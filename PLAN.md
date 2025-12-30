@@ -6,7 +6,7 @@
 
 ## Vision Statement
 
-A dashboard-first learning companion for curious autodidacts who iteratively build knowledge through AI-guided exploration until ready to tackle primary sources. Unlike chat-centric AI interfaces, this app prioritizes **discovery, continuity, and visual demonstration**.
+A learning companion for curious autodidacts who iteratively build knowledge through AI-guided exploration until ready to tackle primary sources. Unlike chat-centric AI interfaces, this app prioritizes **discovery, continuity, and visual demonstration**.
 
 ---
 
@@ -380,11 +380,10 @@ Only add complexity when:
 | 2025-12-30 | System theme preference default | Respects user OS setting |
 | 2025-12-30 | Research CLI first | Prefer leveraging existing Claude Code subscription |
 | 2025-12-30 | Local-first storage | Privacy, no backend needed for MVP |
-| 2025-12-30 | Use Agent SDK over raw CLI | Better streaming, session mgmt, error handling |
 
 ---
 
 ## Current Status
 
-**Phase**: 1 - Foundation
-**Next Action**: Initialize Vite + React + TypeScript project
+**Phase**: 3 - Sandbox
+**Next Action**: Implement sandboxed iframe for visual demos

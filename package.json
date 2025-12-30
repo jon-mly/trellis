@@ -5,10 +5,13 @@
   "description": "Dashboard-first learning companion for curious autodidacts",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3100",
-    "build": "tsc -b && vite build",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "vite:dev": "vite --port 3100",
+    "vite:build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview --port 3100"
+    "preview": "vite preview --port 3100",
+    "tauri": "tauri"
   },
   "dependencies": {
     "dexie": "^4.2.1",
@@ -20,6 +23,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/cli": "^2.9.6",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

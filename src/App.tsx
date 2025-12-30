@@ -1,9 +1,12 @@
+import type { JSX } from 'react';
 import { useEffect, useState } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ChatView } from './components/chat';
+import { Onboarding } from './components/onboarding/Onboarding';
 import { useSessionStore } from './stores/sessionStore';
 import { useSettingsStore } from './stores/settingsStore';
+import { I18nProvider, getTranslations, detectLocale } from './i18n';
 import type { DashboardCard, View } from './types';
 
 const MOCK_CARDS: DashboardCard[] = [
@@ -36,9 +39,11 @@ const MOCK_CARDS: DashboardCard[] = [
   },
 ];
 
-function App() {
+function App(): JSX.Element {
   const [view, setView] = useState<View>('dashboard');
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+
+  const translations = getTranslations(detectLocale());
 
   const {
     topics,
@@ -50,7 +55,7 @@ function App() {
     sendMessage,
   } = useSessionStore();
 
-  const { settings, isLoaded, loadSettings, updateApiKey } = useSettingsStore();
+  const { settings, isLoaded, loadSettings } = useSettingsStore();
 
   useEffect(() => {
     loadTopics();
@@ -75,9 +80,9 @@ function App() {
     await startSession(card.topicId);
     setView('session');
 
-    if (card.suggestedPrompt && settings?.apiKey) {
-      sendMessage(card.suggestedPrompt, settings.apiKey, {
-        teachingStyle: settings.teachingStyle,
+    if (card.suggestedPrompt) {
+      sendMessage(card.suggestedPrompt, {
+        teachingStyle: settings?.teachingStyle,
       });
     }
   };
@@ -86,58 +91,53 @@ function App() {
     await startSession();
     setView('session');
 
-    if (settings?.apiKey) {
-      sendMessage(prompt, settings.apiKey, {
-        teachingStyle: settings.teachingStyle,
-      });
-    }
+    sendMessage(prompt, {
+      teachingStyle: settings?.teachingStyle,
+    });
   };
 
   const handleSendMessage = (content: string) => {
-    if (!settings?.apiKey) {
-      const key = window.prompt('Enter your Anthropic API key:');
-      if (key) {
-        updateApiKey(key);
-        sendMessage(content, key, { teachingStyle: settings?.teachingStyle });
-      }
-      return;
-    }
-
-    sendMessage(content, settings.apiKey, {
-      teachingStyle: settings.teachingStyle,
+    sendMessage(content, {
+      teachingStyle: settings?.teachingStyle,
     });
   };
 
   const selectedTopic = topics.find((t) => t.id === selectedTopicId);
 
   if (!isLoaded) {
-    return null;
+    return <></>;
   }
 
   return (
-    <Layout
-      topics={topics}
-      selectedTopicId={selectedTopicId}
-      onTopicSelect={handleTopicSelect}
-      onNewTopic={handleNewTopic}
-    >
-      {view === 'dashboard' ? (
-        <Dashboard
-          cards={MOCK_CARDS}
-          isLoading={false}
-          onCardClick={handleCardClick}
-          onQuickStart={handleQuickStart}
-        />
+    <I18nProvider value={translations}>
+      {!settings?.onboardingComplete ? (
+        <Onboarding />
       ) : (
-        <ChatView
-          messages={messages}
-          isLoading={isLoading}
-          streamingContent={streamingContent}
-          onSendMessage={handleSendMessage}
-          topicName={selectedTopic?.name}
-        />
+        <Layout
+          topics={topics}
+          selectedTopicId={selectedTopicId}
+          onTopicSelect={handleTopicSelect}
+          onNewTopic={handleNewTopic}
+        >
+          {view === 'dashboard' ? (
+            <Dashboard
+              cards={MOCK_CARDS}
+              isLoading={false}
+              onCardClick={handleCardClick}
+              onQuickStart={handleQuickStart}
+            />
+          ) : (
+            <ChatView
+              messages={messages}
+              isLoading={isLoading}
+              streamingContent={streamingContent}
+              onSendMessage={handleSendMessage}
+              topicName={selectedTopic?.name}
+            />
+          )}
+        </Layout>
       )}
-    </Layout>
+    </I18nProvider>
   );
 }
 

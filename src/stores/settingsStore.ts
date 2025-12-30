@@ -12,28 +12,30 @@ const DEFAULT_TEACHING_STYLE: TeachingStyle = {
   },
 };
 
-const SETTINGS_ID = 'user-settings';
+const SETTINGS_ID: string = 'user-settings';
 
 interface SettingsState {
   settings: Settings | null;
   isLoaded: boolean;
 
   loadSettings: () => Promise<void>;
-  updateApiKey: (apiKey: string) => Promise<void>;
+  completeOnboarding: () => Promise<void>;
   updateTeachingStyle: (style: Partial<TeachingStyle>) => Promise<void>;
+  updateCliPath: (cliPath: string) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: null,
   isLoaded: false,
 
-  loadSettings: async () => {
-    let settings = await db.settings.get(SETTINGS_ID);
+  loadSettings: async (): Promise<void> => {
+    let settings: Settings | undefined = await db.settings.get(SETTINGS_ID);
 
     if (!settings) {
       settings = {
         id: SETTINGS_ID,
         teachingStyle: DEFAULT_TEACHING_STYLE,
+        onboardingComplete: false,
       };
       await db.settings.add(settings);
     }
@@ -41,16 +43,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set({ settings, isLoaded: true });
   },
 
-  updateApiKey: async (apiKey: string) => {
+  completeOnboarding: async (): Promise<void> => {
     const { settings } = get();
     if (!settings) return;
 
-    const updated = { ...settings, apiKey };
+    const updated: Settings = { ...settings, onboardingComplete: true };
     await db.settings.put(updated);
     set({ settings: updated });
   },
 
-  updateTeachingStyle: async (style: Partial<TeachingStyle>) => {
+  updateTeachingStyle: async (style: Partial<TeachingStyle>): Promise<void> => {
     const { settings } = get();
     if (!settings) return;
 
@@ -66,6 +68,15 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       },
     };
 
+    await db.settings.put(updated);
+    set({ settings: updated });
+  },
+
+  updateCliPath: async (cliPath: string): Promise<void> => {
+    const { settings } = get();
+    if (!settings) return;
+
+    const updated: Settings = { ...settings, cliPath };
     await db.settings.put(updated);
     set({ settings: updated });
   },

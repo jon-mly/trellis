@@ -37,7 +37,8 @@ export interface Session {
 export interface Settings {
   id: string;
   teachingStyle: TeachingStyle;
-  apiKey?: string;
+  onboardingComplete: boolean;
+  cliPath?: string;
 }
 
 export interface TeachingStyle {

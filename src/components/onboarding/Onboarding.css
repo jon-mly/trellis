@@ -1,0 +1,332 @@
+.onboarding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-8);
+  background: var(--color-bg);
+}
+
+.onboarding-container {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.onboarding-header {
+  text-align: center;
+}
+
+.onboarding-header h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-2);
+}
+
+.onboarding-header p {
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}
+
+.onboarding-content {
+  flex: 1;
+}
+
+.onboarding-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  padding: var(--space-8);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.onboarding-step h2 {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  letter-spacing: var(--tracking-tight);
+}
+
+.onboarding-step p {
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+  max-width: 320px;
+}
+
+.onboarding-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  color: var(--color-fg-muted);
+}
+
+.onboarding-step-icon--loading {
+  color: var(--color-fg-muted);
+}
+
+.onboarding-step-icon--error {
+  background: var(--color-bg-secondary);
+  color: var(--color-fg);
+}
+
+.onboarding-step-icon--warning {
+  background: var(--color-bg-secondary);
+  color: var(--color-fg);
+}
+
+.onboarding-step-icon--success {
+  background: var(--color-bg-secondary);
+  color: var(--color-fg);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.onboarding-instructions {
+  width: 100%;
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-secondary);
+  text-align: left;
+}
+
+.onboarding-instructions h3 {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  margin-bottom: var(--space-2);
+}
+
+.onboarding-instructions p {
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-2);
+  max-width: none;
+}
+
+.onboarding-command {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-3);
+}
+
+.onboarding-command code {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-fg);
+}
+
+.onboarding-copy-btn {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.onboarding-copy-btn:hover {
+  border-color: var(--color-fg-muted);
+  color: var(--color-fg);
+}
+
+.onboarding-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.onboarding-link:hover {
+  color: var(--color-fg);
+}
+
+.onboarding-note {
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+.onboarding-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  min-width: 140px;
+  height: var(--size-btn-md);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.onboarding-btn:hover:not(:disabled) {
+  border-color: var(--color-fg-muted);
+  background: var(--color-bg-secondary);
+}
+
+.onboarding-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.onboarding-btn--primary {
+  background: var(--color-accent);
+  border-color: transparent;
+  color: var(--color-bg);
+}
+
+.onboarding-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: transparent;
+}
+
+.onboarding-account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-secondary);
+}
+
+.onboarding-account-label {
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+}
+
+.onboarding-account-value {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  color: var(--color-fg);
+}
+
+.onboarding-footer {
+  padding-top: var(--space-4);
+}
+
+.onboarding-steps-indicator {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.step-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  transition: background var(--transition-fast);
+}
+
+.step-indicator--success .step-indicator-dot {
+  background: var(--color-fg);
+}
+
+.step-indicator--error .step-indicator-dot {
+  background: var(--color-fg-muted);
+}
+
+.step-indicator-label {
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+}
+
+.step-indicator--success .step-indicator-label {
+  color: var(--color-fg);
+}
+
+.onboarding-status-message {
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  font-style: italic;
+}
+
+.onboarding-error-details {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg-secondary);
+  text-align: left;
+}
+
+.onboarding-error-step,
+.onboarding-error-message {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+}
+
+.onboarding-error-message {
+  margin-bottom: 0;
+}
+
+.onboarding-error-label {
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  font-weight: var(--font-medium);
+}
+
+.onboarding-error-value {
+  font-size: var(--text-xs);
+  color: var(--color-fg);
+}
+
+.onboarding-error-message code.onboarding-error-value {
+  font-family: var(--font-mono);
+  padding: var(--space-2);
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  word-break: break-word;
+  white-space: pre-wrap;
+}
