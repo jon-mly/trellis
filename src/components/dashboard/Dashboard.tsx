@@ -1,5 +1,9 @@
-import { ArrowRight, CornerDownRight, Layers, Compass, GitBranch } from 'lucide-react';
-import type { DashboardCard } from '../../types';
+import type { JSX } from 'react';
+import { ArrowRight, CornerDownRight, Layers, Compass, GitBranch, RefreshCw } from 'lucide-react';
+import type { DashboardCard, Topic, Concept } from '../../types';
+import { useI18n } from '../../i18n';
+import { KnowledgeWidget } from './KnowledgeWidget';
+import { DataManagement } from '../settings';
 import './Dashboard.css';
 
 interface DashboardProps {
@@ -7,6 +11,11 @@ interface DashboardProps {
   isLoading: boolean;
   onCardClick: (card: DashboardCard) => void;
   onQuickStart: (prompt: string) => void;
+  onRefresh?: () => void;
+  topics?: Topic[];
+  concepts?: Concept[];
+  onTopicClick?: (topicId: string) => void;
+  onDataImport?: () => void;
 }
 
 const CARD_ICONS = {
@@ -16,7 +25,31 @@ const CARD_ICONS = {
   connection: GitBranch,
 } as const;
 
-export function Dashboard({ cards, isLoading, onCardClick, onQuickStart }: DashboardProps) {
+function SkeletonCard(): JSX.Element {
+  return (
+    <div className="dashboard-card dashboard-card--skeleton">
+      <div className="dashboard-card-icon skeleton-pulse" />
+      <div className="dashboard-card-content">
+        <div className="skeleton-title skeleton-pulse" />
+        <div className="skeleton-desc skeleton-pulse" />
+      </div>
+    </div>
+  );
+}
+
+export function Dashboard({
+  cards,
+  isLoading,
+  onCardClick,
+  onQuickStart,
+  onRefresh,
+  topics = [],
+  concepts = [],
+  onTopicClick,
+  onDataImport,
+}: DashboardProps) {
+  const t = useI18n();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -30,12 +63,12 @@ export function Dashboard({ cards, isLoading, onCardClick, onQuickStart }: Dashb
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>What would you like to learn?</h1>
+        <h1>{t.dashboard.heading}</h1>
         <form className="dashboard-quickstart" onSubmit={handleSubmit}>
           <input
             type="text"
             name="prompt"
-            placeholder="Explore a new topic..."
+            placeholder={t.dashboard.inputPlaceholder}
             className="dashboard-input"
             autoComplete="off"
           />
@@ -46,11 +79,30 @@ export function Dashboard({ cards, isLoading, onCardClick, onQuickStart }: Dashb
       </header>
 
       <section className="dashboard-feed">
+        <div className="dashboard-feed-header">
+          <span className="dashboard-feed-label">{t.dashboard.suggestions}</span>
+          {onRefresh && (
+            <button
+              type="button"
+              className={`dashboard-refresh ${isLoading ? 'dashboard-refresh--loading' : ''}`}
+              onClick={onRefresh}
+              disabled={isLoading}
+              title={t.dashboard.refreshSuggestions}
+            >
+              <RefreshCw size={14} strokeWidth={1.5} />
+            </button>
+          )}
+        </div>
+
         {isLoading ? (
-          <div className="dashboard-loading">Generating suggestions...</div>
+          <div className="dashboard-cards">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
         ) : cards.length === 0 ? (
           <div className="dashboard-empty">
-            <p>Start exploring to see personalized suggestions here.</p>
+            <p>{t.dashboard.empty}</p>
           </div>
         ) : (
           <div className="dashboard-cards">
@@ -75,6 +127,18 @@ export function Dashboard({ cards, isLoading, onCardClick, onQuickStart }: Dashb
             })}
           </div>
         )}
+      </section>
+
+      <section className="dashboard-knowledge">
+        <KnowledgeWidget
+          topics={topics}
+          concepts={concepts}
+          onTopicClick={onTopicClick}
+        />
+      </section>
+
+      <section className="dashboard-data">
+        <DataManagement onImportComplete={onDataImport} />
       </section>
     </div>
   );

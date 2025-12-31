@@ -66,9 +66,67 @@
 
 .dashboard-feed {
   flex: 1;
+  margin-bottom: var(--space-6);
 }
 
-.dashboard-loading,
+.dashboard-knowledge {
+  margin-top: auto;
+}
+
+.dashboard-data {
+  margin-top: var(--space-4);
+}
+
+.dashboard-feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.dashboard-feed-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-fg-muted);
+}
+
+.dashboard-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.dashboard-refresh:hover:not(:disabled) {
+  border-color: var(--color-fg);
+  color: var(--color-fg);
+}
+
+.dashboard-refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dashboard-refresh--loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .dashboard-empty {
   font-size: var(--text-sm);
   color: var(--color-fg-muted);
@@ -169,4 +227,38 @@
 
 .dashboard-card:hover .dashboard-card-icon::before {
   opacity: 1;
+}
+
+/* Skeleton loading */
+.dashboard-card--skeleton {
+  pointer-events: none;
+}
+
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg-tertiary) 50%,
+    var(--color-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-title {
+  height: 14px;
+  width: 60%;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-desc {
+  height: 12px;
+  width: 80%;
+  border-radius: var(--radius-sm);
 }

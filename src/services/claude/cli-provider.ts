@@ -1,27 +1,22 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { TeachingStyle } from '../../types';
-
-export interface AuthStatus {
-  installed: boolean;
-  authenticated: boolean;
-  account: string | null;
-  error: string | null;
-  step_failed: string | null;
-}
+import type { TeachingStyle, PromptContext } from '../../types';
 
 export interface ClaudeResponse {
   content: string;
   error: string | null;
+  cli_not_found: boolean;
 }
 
 export interface StreamMessage {
-  type: 'text' | 'done' | 'error';
+  type: 'text' | 'done' | 'error' | 'cli_not_found' | 'prompt_context';
   content: string;
+  promptContext?: PromptContext;
 }
 
 export interface ChatOptions {
   teachingStyle?: TeachingStyle;
   systemPrompt?: string;
+  knowledgeContext?: string;
 }
 
 function buildSystemPrompt(teachingStyle?: TeachingStyle): string {
@@ -69,16 +64,15 @@ function buildSystemPrompt(teachingStyle?: TeachingStyle): string {
   return parts.filter(Boolean).join(' ');
 }
 
-export async function checkClaudeStatus(): Promise<AuthStatus> {
-  const status: AuthStatus = await invoke<AuthStatus>('check_claude_status');
-  return status;
-}
-
 export async function* streamChat(
   messages: Array<{ role: 'user' | 'assistant'; content: string }>,
   options: ChatOptions = {}
 ): AsyncGenerator<StreamMessage> {
-  const systemPrompt: string = options.systemPrompt || buildSystemPrompt(options.teachingStyle);
+  let systemPrompt: string = options.systemPrompt || buildSystemPrompt(options.teachingStyle);
+
+  if (options.knowledgeContext) {
+    systemPrompt = `${systemPrompt}\n\nPrior knowledge context:\n${options.knowledgeContext}`;
+  }
 
   // Build conversation context from message history
   const conversationContext: string = messages
@@ -101,11 +95,25 @@ export async function* streamChat(
     ? lastMessage.content
     : conversationContext;
 
+  // Yield prompt context first so it can be stored with the message
+  const promptContext: PromptContext = {
+    systemPrompt,
+    fullPrompt: prompt,
+    knowledgeContext: options.knowledgeContext,
+  };
+  yield { type: 'prompt_context', content: '', promptContext };
+
   try {
     const response: ClaudeResponse = await invoke<ClaudeResponse>('send_to_claude', {
       prompt,
       systemPrompt,
     });
+
+    // Check if CLI was not found - trigger onboarding
+    if (response.cli_not_found) {
+      yield { type: 'cli_not_found', content: response.error ?? 'Claude CLI not found' };
+      return;
+    }
 
     if (response.error && !response.content) {
       yield { type: 'error', content: response.error };

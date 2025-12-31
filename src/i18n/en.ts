@@ -51,12 +51,29 @@ export const en: TranslationStrings = {
     inputPlaceholder: 'Explore a new topic...',
     loading: 'Generating suggestions...',
     empty: 'Start exploring to see personalized suggestions here.',
+    suggestions: 'Suggestions',
+    refreshSuggestions: 'Refresh suggestions',
     cardTypes: {
       resume: 'Resume',
       expand: 'Expand',
       discover: 'Discover',
       connection: 'Connection',
     },
+  },
+
+  knowledge: {
+    title: 'Knowledge Map',
+    empty: 'Your knowledge map will appear here as you learn.',
+    stats: {
+      topics: 'topics',
+      concepts: 'concepts',
+    },
+    familiarity: {
+      understood: 'Understood',
+      explored: 'Explored',
+      introduced: 'Introduced',
+    },
+    moreTopics: 'more topics',
   },
 
   chat: {
@@ -73,5 +90,20 @@ export const en: TranslationStrings = {
     noActiveSession: 'No active session',
     sessionNotFound: 'Session not found',
     unknownError: 'An unknown error occurred',
+  },
+
+  dataManagement: {
+    title: 'Data Management',
+    export: {
+      button: 'Export Data',
+      description: 'Download your learning data as JSON',
+      success: 'Data exported successfully',
+    },
+    import: {
+      button: 'Import Data',
+      description: 'Restore from a backup file',
+      success: 'Data imported successfully',
+      error: 'Failed to import data. Invalid file format.',
+    },
   },
 };

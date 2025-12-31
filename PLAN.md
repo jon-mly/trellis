@@ -116,34 +116,28 @@ A learning companion for curious autodidacts who iteratively build knowledge thr
 - **Sandbox**: Sandboxed iframe with postMessage API
 
 ### Claude Integration
-- **Approach**: Use `@anthropic-ai/claude-agent-sdk` (official SDK)
-- **Authentication**:
-  - Primary: User's existing `claude login` credentials (stored in Keychain)
-  - Fallback: `ANTHROPIC_API_KEY` environment variable
-- **Streaming**: Full support via async generators
-- **Session management**: Built-in resume via `session_id`
-- **Cost tracking**: `total_cost_usd` returned with each result
+- **Approach**: Tauri desktop app wrapping Claude Code CLI (similar to Cline)
+- **Authentication**: User's existing `claude login` credentials
+- **CLI Invocation**: Spawns `claude -p` processes via Tauri Rust backend
+- **Error Handling**: Detects CLI not found and prompts user to install
 
-```typescript
-// Example integration pattern
-import { query } from "@anthropic-ai/claude-agent-sdk";
-
-const result = query({
-  prompt: userMessage,
-  options: {
-    resume: sessionId, // Multi-turn conversations
-    systemPrompt: {
-      type: 'preset',
-      preset: 'claude_code',
-      append: teachingStyleInstructions
-    }
-  }
-});
-
-for await (const message of result) {
-  // Stream to UI
+```rust
+// Rust backend (src-tauri/src/lib.rs)
+#[tauri::command]
+async fn send_to_claude(prompt: String, system_prompt: Option<String>) -> Result<ClaudeResponse, String> {
+    Command::new("claude")
+        .arg("-p")
+        .arg(&full_prompt)
+        .arg("--output-format")
+        .arg("text")
+        .spawn()
 }
 ```
+
+**Future Development**:
+- Web deployment with API key support
+- Streaming support (currently returns full response)
+- Session management via Claude CLI resume flags
 
 ### Data Models (Draft)
 
@@ -281,7 +275,7 @@ src/
 - [x] Test authentication/session reuse
 - [x] Document findings and decide primary integration path
 
-**Finding**: Use `@anthropic-ai/claude-agent-sdk` - full streaming, session management, auto-auth
+**Finding**: Use Tauri + Claude CLI wrapper (like Cline) for desktop MVP. Web/API key support deferred.
 
 ### Phase 1: Foundation ✅ COMPLETE
 - [x] Project setup (Vite + React + TypeScript)
@@ -292,11 +286,14 @@ src/
 - [ ] System preference theme detection + toggle (deferred)
 
 ### Phase 2: Core Chat ✅ COMPLETE
-- [x] Claude API integration with streaming - `src/services/claude/client.ts`
+- [x] Tauri desktop app setup - `src-tauri/`
+- [x] Claude CLI integration via Rust backend - `src-tauri/src/lib.rs`
+- [x] CLI not found detection + onboarding flow - `src/components/onboarding/`
 - [x] Chat UI with markdown rendering - `src/components/chat/`
 - [x] IndexedDB setup with Dexie - `src/services/storage/db.ts`
 - [x] Session persistence via Zustand - `src/stores/sessionStore.ts`
 - [x] Teaching style configuration - `src/stores/settingsStore.ts`
+- [x] i18n system (English) - `src/i18n/`
 
 ### Phase 3: Sandbox
 - [ ] Sandboxed iframe implementation
@@ -304,16 +301,16 @@ src/
 - [ ] Insert/update/replace code in sandbox
 - [ ] Panel resizing and pop-out
 
-### Phase 4: Knowledge System
-- [ ] Concept extraction prompts
-- [ ] Knowledge graph data model
-- [ ] Context injection for new sessions
-- [ ] Dashboard feed generation
+### Phase 4: Knowledge System ✅ COMPLETE
+- [x] Concept extraction prompts - `src/services/claude/concept-extraction.ts`
+- [x] Knowledge store for managing concepts - `src/stores/knowledgeStore.ts`
+- [x] Context injection for new sessions - `src/services/claude/cli-provider.ts`
+- [x] Dashboard feed generation - `src/services/claude/feed-generation.ts`, `src/stores/dashboardStore.ts`
 
-### Phase 5: Polish
-- [ ] Dashboard refinement
-- [ ] Knowledge visualization widget
-- [ ] Export/import functionality
+### Phase 5: Polish ✅ COMPLETE
+- [x] Dashboard refinement - skeleton loading, refresh button, improved UX
+- [x] Knowledge visualization widget - `src/components/dashboard/KnowledgeWidget.tsx`
+- [x] Export/import functionality - `src/components/settings/DataManagement.tsx`, `src/services/storage/data-export.ts`
 
 ---
 
@@ -380,10 +377,30 @@ Only add complexity when:
 | 2025-12-30 | System theme preference default | Respects user OS setting |
 | 2025-12-30 | Research CLI first | Prefer leveraging existing Claude Code subscription |
 | 2025-12-30 | Local-first storage | Privacy, no backend needed for MVP |
+| 2025-12-31 | Tauri over Electron | Smaller bundle, Rust backend, native performance |
+| 2025-12-31 | Claude CLI wrapper approach | Leverage Claude Max subscription without API key |
+| 2025-12-31 | Lazy CLI validation | No upfront auth check; detect CLI issues on first use |
 
 ---
 
 ## Current Status
 
-**Phase**: 3 - Sandbox
-**Next Action**: Implement sandboxed iframe for visual demos
+**Phase**: 5 - Polish ✅ COMPLETE
+**Next Action**: Phase 3 (Sandbox) or deployment preparation
+
+---
+
+## Future Development Notes
+
+### Chat UX Improvements (Post-MVP)
+Once all phases are implemented, revisit the LLM response UX:
+- Streaming text display (currently shows full response at once)
+- Typing indicators during CLI execution
+- Better error state visualization
+- Response formatting options (compact vs expanded)
+- Code block syntax highlighting improvements
+
+### Web Deployment (Deferred)
+- Add API key authentication option for web users
+- Abstract CLI provider to support both CLI and API backends
+- Consider Claude Agent SDK when web version is prioritized

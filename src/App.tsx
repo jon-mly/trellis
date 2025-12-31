@@ -6,42 +6,15 @@ import { ChatView } from './components/chat';
 import { Onboarding } from './components/onboarding/Onboarding';
 import { useSessionStore } from './stores/sessionStore';
 import { useSettingsStore } from './stores/settingsStore';
+import { useDashboardStore } from './stores/dashboardStore';
+import { useKnowledgeStore } from './stores/knowledgeStore';
 import { I18nProvider, getTranslations, detectLocale } from './i18n';
 import type { DashboardCard, View } from './types';
-
-const MOCK_CARDS: DashboardCard[] = [
-  {
-    id: '1',
-    type: 'resume',
-    title: 'Continue: Trigonometry',
-    description: 'You were learning about the unit circle and radians',
-    topicId: '1',
-    lastExplored: new Date(),
-  },
-  {
-    id: '2',
-    type: 'expand',
-    title: 'Expand: Rust Ownership',
-    description: 'Ready to explore borrowing and lifetimes?',
-    topicId: '2',
-  },
-  {
-    id: '3',
-    type: 'discover',
-    title: 'Discover: Fourier Transforms',
-    description: 'Based on your interest in trigonometry',
-  },
-  {
-    id: '4',
-    type: 'connection',
-    title: 'Connection: Math meets Programming',
-    description: 'Trigonometry concepts are used in graphics programming',
-  },
-];
 
 function App(): JSX.Element {
   const [view, setView] = useState<View>('dashboard');
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [knowledgeContext, setKnowledgeContext] = useState<string>('');
 
   const translations = getTranslations(detectLocale());
 
@@ -50,17 +23,49 @@ function App(): JSX.Element {
     messages,
     isLoading,
     streamingContent,
+    cliNotFound,
     loadTopics,
     startSession,
     sendMessage,
+    endSession,
+    resetCliNotFound,
   } = useSessionStore();
 
-  const { settings, isLoaded, loadSettings } = useSettingsStore();
+  const { settings, isLoaded, loadSettings, completeOnboarding } = useSettingsStore();
+
+  const {
+    cards,
+    isLoading: isFeedLoading,
+    loadFeed,
+    refreshFeed,
+  } = useDashboardStore();
+
+  const {
+    topics: knowledgeTopics,
+    concepts,
+    loadKnowledge,
+    getKnowledgeContext,
+  } = useKnowledgeStore();
 
   useEffect(() => {
     loadTopics();
     loadSettings();
-  }, [loadTopics, loadSettings]);
+    loadKnowledge();
+  }, [loadTopics, loadSettings, loadKnowledge]);
+
+  useEffect(() => {
+    if (settings?.onboardingComplete && view === 'dashboard') {
+      loadFeed();
+    }
+  }, [settings?.onboardingComplete, view, loadFeed]);
+
+  useEffect(() => {
+    const loadContext = async () => {
+      const context = await getKnowledgeContext();
+      setKnowledgeContext(context);
+    };
+    loadContext();
+  }, [getKnowledgeContext]);
 
   const handleTopicSelect = (topicId: string) => {
     setSelectedTopicId(topicId);
@@ -83,6 +88,7 @@ function App(): JSX.Element {
     if (card.suggestedPrompt) {
       sendMessage(card.suggestedPrompt, {
         teachingStyle: settings?.teachingStyle,
+        knowledgeContext,
       });
     }
   };
@@ -93,13 +99,21 @@ function App(): JSX.Element {
 
     sendMessage(prompt, {
       teachingStyle: settings?.teachingStyle,
+      knowledgeContext,
     });
   };
 
   const handleSendMessage = (content: string) => {
     sendMessage(content, {
       teachingStyle: settings?.teachingStyle,
+      knowledgeContext,
     });
+  };
+
+  const handleBackToDashboard = () => {
+    setView('dashboard');
+    setSelectedTopicId(null);
+    endSession().then(() => refreshFeed());
   };
 
   const selectedTopic = topics.find((t) => t.id === selectedTopicId);
@@ -108,10 +122,23 @@ function App(): JSX.Element {
     return <></>;
   }
 
+  const handleCliSetupComplete = () => {
+    resetCliNotFound();
+  };
+
+  // Show onboarding if CLI is not found during usage
+  if (cliNotFound) {
+    return (
+      <I18nProvider value={translations}>
+        <Onboarding onComplete={handleCliSetupComplete} />
+      </I18nProvider>
+    );
+  }
+
   return (
     <I18nProvider value={translations}>
       {!settings?.onboardingComplete ? (
-        <Onboarding />
+        <Onboarding onComplete={completeOnboarding} />
       ) : (
         <Layout
           topics={topics}
@@ -121,10 +148,19 @@ function App(): JSX.Element {
         >
           {view === 'dashboard' ? (
             <Dashboard
-              cards={MOCK_CARDS}
-              isLoading={false}
+              cards={cards}
+              isLoading={isFeedLoading}
               onCardClick={handleCardClick}
               onQuickStart={handleQuickStart}
+              onRefresh={refreshFeed}
+              topics={knowledgeTopics}
+              concepts={concepts}
+              onTopicClick={handleTopicSelect}
+              onDataImport={() => {
+                loadKnowledge();
+                loadTopics();
+                refreshFeed();
+              }}
             />
           ) : (
             <ChatView
@@ -132,6 +168,7 @@ function App(): JSX.Element {
               isLoading={isLoading}
               streamingContent={streamingContent}
               onSendMessage={handleSendMessage}
+              onBack={handleBackToDashboard}
               topicName={selectedTopic?.name}
             />
           )}

@@ -24,6 +24,13 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  promptContext?: PromptContext;
+}
+
+export interface PromptContext {
+  systemPrompt: string;
+  fullPrompt: string;
+  knowledgeContext?: string;
 }
 
 export interface Session {

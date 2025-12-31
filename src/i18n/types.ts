@@ -54,12 +54,30 @@ export interface TranslationStrings {
     inputPlaceholder: string;
     loading: string;
     empty: string;
+    suggestions: string;
+    refreshSuggestions: string;
     cardTypes: {
       resume: string;
       expand: string;
       discover: string;
       connection: string;
     };
+  };
+
+  // Knowledge Widget
+  knowledge: {
+    title: string;
+    empty: string;
+    stats: {
+      topics: string;
+      concepts: string;
+    };
+    familiarity: {
+      understood: string;
+      explored: string;
+      introduced: string;
+    };
+    moreTopics: string;
   };
 
   // Chat
@@ -79,5 +97,21 @@ export interface TranslationStrings {
     noActiveSession: string;
     sessionNotFound: string;
     unknownError: string;
+  };
+
+  // Data Management
+  dataManagement: {
+    title: string;
+    export: {
+      button: string;
+      description: string;
+      success: string;
+    };
+    import: {
+      button: string;
+      description: string;
+      success: string;
+      error: string;
+    };
   };
 }

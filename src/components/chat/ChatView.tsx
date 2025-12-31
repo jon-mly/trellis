@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, ArrowLeft, Eye, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import type { Message } from '../../types';
+import type { Message, PromptContext } from '../../types';
 import './ChatView.css';
 
-interface ChatViewProps {
+export interface ChatViewProps {
   messages: Message[];
   isLoading: boolean;
   streamingContent: string;
   onSendMessage: (content: string) => void;
+  onBack?: () => void;
   topicName?: string;
 }
 
@@ -17,9 +18,11 @@ export function ChatView({
   isLoading,
   streamingContent,
   onSendMessage,
+  onBack,
   topicName,
 }: ChatViewProps) {
   const [input, setInput] = useState('');
+  const [viewingPrompt, setViewingPrompt] = useState<PromptContext | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -51,17 +54,37 @@ export function ChatView({
 
   return (
     <div className="chat">
-      {topicName && (
-        <header className="chat-header">
-          <span className="chat-topic-label">Topic</span>
-          <h2 className="chat-topic-name">{topicName}</h2>
-        </header>
-      )}
+      <header className="chat-header">
+        {onBack && (
+          <button type="button" className="chat-back-button" onClick={onBack}>
+            <ArrowLeft size={16} strokeWidth={1.5} />
+            <span>Back</span>
+          </button>
+        )}
+        {topicName && (
+          <div className="chat-topic">
+            <span className="chat-topic-label">Topic</span>
+            <h2 className="chat-topic-name">{topicName}</h2>
+          </div>
+        )}
+      </header>
 
       <div className="chat-messages">
         {messages.map((message) => (
           <div key={message.id} className={`chat-message chat-message--${message.role}`}>
-            <div className="chat-message-role">{message.role === 'user' ? 'You' : 'Assistant'}</div>
+            <div className="chat-message-header">
+              <span className="chat-message-role">{message.role === 'user' ? 'You' : 'Assistant'}</span>
+              {message.role === 'user' && message.promptContext && (
+                <button
+                  type="button"
+                  className="chat-prompt-view-btn"
+                  onClick={() => setViewingPrompt(message.promptContext ?? null)}
+                  title="View actual prompt sent"
+                >
+                  <Eye size={14} strokeWidth={1.5} />
+                </button>
+              )}
+            </div>
             <div className="chat-message-content">
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
@@ -112,6 +135,39 @@ export function ChatView({
           </button>
         </div>
       </form>
+
+      {viewingPrompt && (
+        <div className="prompt-modal-overlay" onClick={() => setViewingPrompt(null)}>
+          <div className="prompt-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="prompt-modal-header">
+              <h3>Prompt Details</h3>
+              <button
+                type="button"
+                className="prompt-modal-close"
+                onClick={() => setViewingPrompt(null)}
+              >
+                <X size={18} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div className="prompt-modal-content">
+              <section className="prompt-section">
+                <h4>System Prompt</h4>
+                <pre>{viewingPrompt.systemPrompt}</pre>
+              </section>
+              {viewingPrompt.knowledgeContext && (
+                <section className="prompt-section">
+                  <h4>Knowledge Context</h4>
+                  <pre>{viewingPrompt.knowledgeContext}</pre>
+                </section>
+              )}
+              <section className="prompt-section">
+                <h4>Full Prompt Sent</h4>
+                <pre>{viewingPrompt.fullPrompt}</pre>
+              </section>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

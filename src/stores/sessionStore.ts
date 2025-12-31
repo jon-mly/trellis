@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Message, Session, Topic } from '../types';
+import type { Message, Session, Topic, PromptContext } from '../types';
 import { db, generateId } from '../services/storage/db';
 import { streamChat, type ChatOptions } from '../services/claude/cli-provider';
+import { useKnowledgeStore } from './knowledgeStore';
 
 interface SessionState {
   currentSession: Session | null;
@@ -10,11 +11,14 @@ interface SessionState {
   isLoading: boolean;
   streamingContent: string;
   error: string | null;
+  cliNotFound: boolean;
 
   loadTopics: () => Promise<void>;
   startSession: (topicId?: string) => Promise<void>;
   sendMessage: (content: string, options?: ChatOptions) => Promise<void>;
   loadSession: (sessionId: string) => Promise<void>;
+  endSession: () => Promise<Topic | null>;
+  resetCliNotFound: () => void;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -24,6 +28,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   isLoading: false,
   streamingContent: '',
   error: null,
+  cliNotFound: false,
 
   loadTopics: async (): Promise<void> => {
     const topics: Topic[] = await db.topics.orderBy('lastExploredAt').reverse().toArray();
@@ -87,12 +92,26 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     }));
 
     let assistantContent: string = '';
+    let promptContext: PromptContext | undefined;
 
     try {
       for await (const chunk of streamChat(chatHistory, options)) {
-        if (chunk.type === 'text') {
+        if (chunk.type === 'prompt_context') {
+          promptContext = chunk.promptContext;
+          // Update the user message with prompt context
+          const updatedUserMessage: Message = { ...userMessage, promptContext };
+          await db.messages.update(userMessage.id, { promptContext });
+          set((state: SessionState) => ({
+            messages: state.messages.map((m: Message): Message =>
+              m.id === userMessage.id ? updatedUserMessage : m
+            ),
+          }));
+        } else if (chunk.type === 'text') {
           assistantContent += chunk.content;
           set({ streamingContent: assistantContent });
+        } else if (chunk.type === 'cli_not_found') {
+          set({ cliNotFound: true, isLoading: false, streamingContent: '' });
+          return;
         } else if (chunk.type === 'error') {
           set({ error: chunk.content, isLoading: false, streamingContent: '' });
           return;
@@ -123,5 +142,38 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         streamingContent: '',
       });
     }
+  },
+
+  endSession: async (): Promise<Topic | null> => {
+    const { currentSession, messages } = get();
+
+    if (!currentSession || messages.length < 2) {
+      set({ currentSession: null, messages: [] });
+      return null;
+    }
+
+    const knowledgeStore = useKnowledgeStore.getState();
+
+    let topic: Topic | null = null;
+
+    if (currentSession.topicId) {
+      await knowledgeStore.updateTopicFromSession(
+        currentSession.topicId,
+        currentSession.id,
+        messages
+      );
+      topic = await db.topics.get(currentSession.topicId) ?? null;
+    } else {
+      topic = await knowledgeStore.extractAndSaveKnowledge(messages, currentSession.id);
+    }
+
+    const topics: Topic[] = await db.topics.orderBy('lastExploredAt').reverse().toArray();
+    set({ currentSession: null, messages: [], topics });
+
+    return topic;
+  },
+
+  resetCliNotFound: () => {
+    set({ cliNotFound: false });
   },
 }));
