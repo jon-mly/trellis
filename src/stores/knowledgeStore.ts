@@ -8,14 +8,22 @@ import {
   linkRelatedConcepts,
   type ExtractedKnowledge,
 } from '../services/claude/concept-extraction';
+import {
+  identifyTopicFromMessage,
+  findMatchingTopic,
+  type IdentifiedTopic,
+  type TopicMatchResult,
+} from '../services/claude/topic-identification';
 
 interface KnowledgeState {
   topics: Topic[];
   concepts: Concept[];
   isExtracting: boolean;
+  isIdentifyingTopic: boolean;
   lastExtraction: ExtractedKnowledge | null;
 
   loadKnowledge: () => Promise<void>;
+  identifyOrCreateTopic: (userMessage: string, sessionId: string) => Promise<Topic | null>;
   extractAndSaveKnowledge: (messages: Message[], sessionId: string) => Promise<Topic | null>;
   updateTopicFromSession: (topicId: string, sessionId: string, messages: Message[]) => Promise<void>;
   getTopicWithConcepts: (topicId: string) => Promise<{ topic: Topic; concepts: Concept[] } | null>;
@@ -27,12 +35,82 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
   topics: [],
   concepts: [],
   isExtracting: false,
+  isIdentifyingTopic: false,
   lastExtraction: null,
 
   loadKnowledge: async (): Promise<void> => {
     const topics: Topic[] = await db.topics.orderBy('lastExploredAt').reverse().toArray();
     const concepts: Concept[] = await db.concepts.toArray();
     set({ topics, concepts });
+  },
+
+  identifyOrCreateTopic: async (
+    userMessage: string,
+    sessionId: string
+  ): Promise<Topic | null> => {
+    set({ isIdentifyingTopic: true });
+
+    try {
+      // Step 1: Identify the topic from the user's message
+      const identifiedTopic: IdentifiedTopic | null = await identifyTopicFromMessage(userMessage);
+
+      if (!identifiedTopic) {
+        set({ isIdentifyingTopic: false });
+        return null;
+      }
+
+      // Step 2: Get existing topics from DB
+      const existingTopics: Topic[] = await db.topics.toArray();
+
+      // Step 3: Check for semantic match with existing topics
+      const matchResult: TopicMatchResult = await findMatchingTopic(identifiedTopic, existingTopics);
+
+      const now: Date = new Date();
+
+      if (matchResult.matchedTopicId) {
+        // Step 4a: Link session to existing topic
+        const existingTopic: Topic | undefined = await db.topics.get(matchResult.matchedTopicId);
+
+        if (existingTopic) {
+          const updatedSessionIds: string[] = existingTopic.sessionIds.includes(sessionId)
+            ? existingTopic.sessionIds
+            : [...existingTopic.sessionIds, sessionId];
+
+          await db.topics.update(existingTopic.id, {
+            lastExploredAt: now,
+            sessionIds: updatedSessionIds,
+          });
+
+          await db.sessions.update(sessionId, { topicId: existingTopic.id });
+
+          const updatedTopic: Topic | undefined = await db.topics.get(existingTopic.id);
+          await get().loadKnowledge();
+          set({ isIdentifyingTopic: false });
+          return updatedTopic ?? null;
+        }
+      }
+
+      // Step 4b: Create new topic (no concepts yet - those are extracted at session end)
+      const newTopic: Topic = {
+        id: generateId(),
+        name: identifiedTopic.topicName,
+        category: identifiedTopic.topicCategory,
+        conceptIds: [],
+        sessionIds: [sessionId],
+        createdAt: now,
+        lastExploredAt: now,
+      };
+
+      await db.topics.add(newTopic);
+      await db.sessions.update(sessionId, { topicId: newTopic.id });
+
+      await get().loadKnowledge();
+      set({ isIdentifyingTopic: false });
+      return newTopic;
+    } catch {
+      set({ isIdentifyingTopic: false });
+      return null;
+    }
   },
 
   extractAndSaveKnowledge: async (

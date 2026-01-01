@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
-import { ArrowRight, CornerDownRight, Layers, Compass, GitBranch, RefreshCw } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { ArrowRight, RefreshCw, CornerDownRight, Compass, Link2, Sparkles } from 'lucide-react';
 import type { DashboardCard, Topic, Concept } from '../../types';
 import { useI18n } from '../../i18n';
 import { KnowledgeWidget } from './KnowledgeWidget';
@@ -18,12 +19,12 @@ interface DashboardProps {
   onDataImport?: () => void;
 }
 
-const CARD_ICONS = {
+const CARD_ICONS: Record<DashboardCard['type'], LucideIcon> = {
   resume: CornerDownRight,
-  expand: Layers,
-  discover: Compass,
-  connection: GitBranch,
-} as const;
+  explore: Compass,
+  related: Link2,
+  wildcard: Sparkles,
+};
 
 function SkeletonCard(): JSX.Element {
   return (
@@ -94,7 +95,7 @@ export function Dashboard({
           )}
         </div>
 
-        {isLoading ? (
+        {isLoading && cards.length === 0 ? (
           <div className="dashboard-cards">
             <SkeletonCard />
             <SkeletonCard />
@@ -105,9 +106,9 @@ export function Dashboard({
             <p>{t.dashboard.empty}</p>
           </div>
         ) : (
-          <div className="dashboard-cards">
-            {cards.map((card) => {
-              const Icon = CARD_ICONS[card.type];
+          <div className={`dashboard-cards ${isLoading ? 'dashboard-cards--refreshing' : ''}`}>
+            {cards.map((card: DashboardCard) => {
+              const Icon: LucideIcon = CARD_ICONS[card.type];
               return (
                 <button
                   key={card.id}

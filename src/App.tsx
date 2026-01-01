@@ -1,51 +1,35 @@
-import type { JSX } from 'react';
-import { useEffect, useState } from 'react';
-import { Layout } from './components/layout/Layout';
-import { Dashboard } from './components/dashboard/Dashboard';
-import { ChatView } from './components/chat';
-import { Onboarding } from './components/onboarding/Onboarding';
-import { useSessionStore } from './stores/sessionStore';
-import { useSettingsStore } from './stores/settingsStore';
-import { useDashboardStore } from './stores/dashboardStore';
-import { useKnowledgeStore } from './stores/knowledgeStore';
-import { I18nProvider, getTranslations, detectLocale } from './i18n';
-import type { DashboardCard, View } from './types';
+import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
+import { Layout } from "./components/layout/Layout";
+import { Dashboard } from "./components/dashboard/Dashboard";
+import { TopicView, NewSessionView } from "./components/topic";
+import { Onboarding } from "./components/onboarding/Onboarding";
+import { ExitGuardModal } from "./components/common";
+import { TeachingStyleView } from "./components/settings";
+import { useSessionStore } from "./stores/sessionStore";
+import { useSettingsStore } from "./stores/settingsStore";
+import { useDashboardStore } from "./stores/dashboardStore";
+import { useKnowledgeStore } from "./stores/knowledgeStore";
+import { useExitGuard } from "./hooks/useExitGuard";
+import { I18nProvider, getTranslations, detectLocale } from "./i18n";
+import type { DashboardCard, TeachingStyle, View } from "./types";
 
-function App(): JSX.Element {
-  const [view, setView] = useState<View>('dashboard');
+function App(): ReactElement {
+  const [view, setView] = useState<View>("dashboard");
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
-  const [knowledgeContext, setKnowledgeContext] = useState<string>('');
+  const [knowledgeContext, setKnowledgeContext] = useState<string>("");
 
   const translations = getTranslations(detectLocale());
+  const { pendingClose } = useExitGuard();
 
-  const {
-    topics,
-    messages,
-    isLoading,
-    streamingContent,
-    cliNotFound,
-    loadTopics,
-    startSession,
-    sendMessage,
-    endSession,
-    resetCliNotFound,
-  } = useSessionStore();
+  const { topics, cliNotFound, loadTopics, createTopic, deleteTopic, startSession, sendMessage, endSession, resetCliNotFound, clearCurrentSession, loadSessionsForTopic } =
+    useSessionStore();
 
-  const { settings, isLoaded, loadSettings, completeOnboarding } = useSettingsStore();
+  const { settings, isLoaded, loadSettings, completeOnboarding, updateTeachingStyle } = useSettingsStore();
 
-  const {
-    cards,
-    isLoading: isFeedLoading,
-    loadFeed,
-    refreshFeed,
-  } = useDashboardStore();
+  const { cards, isLoading: isFeedLoading, loadFeed, refreshFeed } = useDashboardStore();
 
-  const {
-    topics: knowledgeTopics,
-    concepts,
-    loadKnowledge,
-    getKnowledgeContext,
-  } = useKnowledgeStore();
+  const { topics: knowledgeTopics, concepts, loadKnowledge, getKnowledgeContext } = useKnowledgeStore();
 
   useEffect(() => {
     loadTopics();
@@ -54,7 +38,7 @@ function App(): JSX.Element {
   }, [loadTopics, loadSettings, loadKnowledge]);
 
   useEffect(() => {
-    if (settings?.onboardingComplete && view === 'dashboard') {
+    if (settings?.onboardingComplete && view === "dashboard") {
       loadFeed();
     }
   }, [settings?.onboardingComplete, view, loadFeed]);
@@ -67,23 +51,46 @@ function App(): JSX.Element {
     loadContext();
   }, [getKnowledgeContext]);
 
-  const handleTopicSelect = (topicId: string) => {
+  const handleTopicSelect = (topicId: string): void => {
     setSelectedTopicId(topicId);
-    setView('session');
-    startSession(topicId);
+    setView("session");
+    void loadSessionsForTopic(topicId);
   };
 
-  const handleNewTopic = async () => {
-    await startSession();
-    setView('session');
+  const handleNewTopic = (): void => {
+    setSelectedTopicId(null);
+    startSession();
+    setView("session");
   };
 
-  const handleCardClick = async (card: DashboardCard) => {
-    if (card.topicId) {
-      setSelectedTopicId(card.topicId);
+  const handleDashboard = (): void => {
+    setView("dashboard");
+    setSelectedTopicId(null);
+    void endSession().then(() => refreshFeed());
+    clearCurrentSession();
+  };
+
+  const handleSettings = (): void => {
+    setView("settings");
+    setSelectedTopicId(null);
+  };
+
+  const handleSaveTeachingStyle = (style: TeachingStyle): void => {
+    void updateTeachingStyle(style);
+  };
+
+  const handleCardClick = async (card: DashboardCard): Promise<void> => {
+    let topicId = card.topicId;
+
+    // If card doesn't have a topicId, create a new topic from the card title
+    if (!topicId) {
+      const newTopic = await createTopic(card.title);
+      topicId = newTopic.id;
     }
-    await startSession(card.topicId);
-    setView('session');
+
+    setSelectedTopicId(topicId);
+    startSession(topicId);
+    setView("session");
 
     if (card.suggestedPrompt) {
       sendMessage(card.suggestedPrompt, {
@@ -94,8 +101,8 @@ function App(): JSX.Element {
   };
 
   const handleQuickStart = async (prompt: string) => {
-    await startSession();
-    setView('session');
+    startSession();
+    setView("session");
 
     sendMessage(prompt, {
       teachingStyle: settings?.teachingStyle,
@@ -103,17 +110,20 @@ function App(): JSX.Element {
     });
   };
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = (content: string): void => {
     sendMessage(content, {
       teachingStyle: settings?.teachingStyle,
       knowledgeContext,
     });
   };
 
-  const handleBackToDashboard = () => {
-    setView('dashboard');
-    setSelectedTopicId(null);
-    endSession().then(() => refreshFeed());
+  const handleDeleteTopic = async (): Promise<void> => {
+    if (selectedTopicId) {
+      await deleteTopic(selectedTopicId);
+      setSelectedTopicId(null);
+      setView("dashboard");
+      refreshFeed();
+    }
   };
 
   const selectedTopic = topics.find((t) => t.id === selectedTopicId);
@@ -140,39 +150,41 @@ function App(): JSX.Element {
       {!settings?.onboardingComplete ? (
         <Onboarding onComplete={completeOnboarding} />
       ) : (
-        <Layout
-          topics={topics}
-          selectedTopicId={selectedTopicId}
-          onTopicSelect={handleTopicSelect}
-          onNewTopic={handleNewTopic}
-        >
-          {view === 'dashboard' ? (
-            <Dashboard
-              cards={cards}
-              isLoading={isFeedLoading}
-              onCardClick={handleCardClick}
-              onQuickStart={handleQuickStart}
-              onRefresh={refreshFeed}
-              topics={knowledgeTopics}
-              concepts={concepts}
-              onTopicClick={handleTopicSelect}
-              onDataImport={() => {
-                loadKnowledge();
-                loadTopics();
-                refreshFeed();
-              }}
-            />
-          ) : (
-            <ChatView
-              messages={messages}
-              isLoading={isLoading}
-              streamingContent={streamingContent}
-              onSendMessage={handleSendMessage}
-              onBack={handleBackToDashboard}
-              topicName={selectedTopic?.name}
-            />
-          )}
-        </Layout>
+        <>
+          <Layout
+            topics={topics}
+            selectedTopicId={selectedTopicId}
+            onTopicSelect={handleTopicSelect}
+            onNewTopic={handleNewTopic}
+            onDashboard={handleDashboard}
+            onSettings={handleSettings}
+          >
+            {view === "dashboard" ? (
+              <Dashboard
+                cards={cards}
+                isLoading={isFeedLoading}
+                onCardClick={handleCardClick}
+                onQuickStart={handleQuickStart}
+                onRefresh={refreshFeed}
+                topics={knowledgeTopics}
+                concepts={concepts}
+                onTopicClick={handleTopicSelect}
+                onDataImport={() => {
+                  loadKnowledge();
+                  loadTopics();
+                  refreshFeed();
+                }}
+              />
+            ) : view === "settings" && settings?.teachingStyle ? (
+              <TeachingStyleView teachingStyle={settings.teachingStyle} onSave={handleSaveTeachingStyle} onBack={handleDashboard} />
+            ) : view === "session" && selectedTopic ? (
+              <TopicView topic={selectedTopic} onSendMessage={handleSendMessage} onDeleteTopic={handleDeleteTopic} />
+            ) : view === "session" ? (
+              <NewSessionView onSendMessage={handleSendMessage} />
+            ) : null}
+          </Layout>
+          <ExitGuardModal isVisible={pendingClose} />
+        </>
       )}
     </I18nProvider>
   );

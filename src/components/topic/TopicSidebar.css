@@ -1,0 +1,181 @@
+.topic-sidebar {
+  width: 220px;
+  height: 100%;
+  background-color: var(--color-bg);
+  border-right: var(--border-width) solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.topic-sidebar-header {
+  padding: var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.topic-sidebar-summary-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-fg-muted);
+  margin: 0 0 var(--space-2);
+}
+
+.topic-sidebar-summary-text {
+  font-size: var(--text-xs);
+  color: var(--color-fg-secondary);
+  line-height: 1.5;
+  margin: 0;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.topic-sidebar-sessions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topic-sidebar-sessions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.topic-sidebar-sessions-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+.topic-sidebar-new-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.topic-sidebar-new-btn:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-fg);
+  border-color: var(--color-fg-muted);
+}
+
+.topic-sidebar-empty {
+  padding: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  margin: 0;
+}
+
+.topic-sidebar-sessions-list {
+  list-style: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.topic-sidebar-session {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-fg-secondary);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.topic-sidebar-session:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-fg);
+}
+
+.topic-sidebar-session.active {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-fg);
+}
+
+.topic-sidebar-session-date {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-sidebar-session-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.topic-sidebar-session:hover .topic-sidebar-session-delete {
+  opacity: 1;
+}
+
+.topic-sidebar-session-delete:hover {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.topic-sidebar-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.topic-sidebar-delete-topic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-fg-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.topic-sidebar-delete-topic:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}

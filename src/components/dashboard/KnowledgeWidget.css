@@ -118,7 +118,7 @@
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3);
   border: none;
   border-radius: var(--radius-sm);
   background: transparent;
@@ -126,6 +126,7 @@
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast);
+  min-height: 52px;
 }
 
 .knowledge-topic:hover {
@@ -137,7 +138,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .knowledge-topic-name {
@@ -146,11 +147,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .knowledge-topic-category {
   font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
   color: var(--color-fg-muted);
+  line-height: 1;
 }
 
 .knowledge-topic-concepts {

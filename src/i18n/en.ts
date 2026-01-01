@@ -82,8 +82,31 @@ export const en: TranslationStrings = {
   },
 
   sidebar: {
+    dashboard: 'Dashboard',
     newTopic: 'New Topic',
     noTopics: 'No topics yet. Start a conversation!',
+    exploredThemes: 'Explored Themes',
+    settings: 'Settings',
+  },
+
+  topicView: {
+    newSession: 'New Session',
+    sessions: 'Sessions',
+    noSessions: 'No sessions yet.',
+    sessionDate: 'Session',
+    summary: 'Summary',
+    noSummary: 'No summary available yet.',
+    deleteSession: 'Delete session',
+    deleteTopic: 'Delete Topic',
+    deleteTopicTitle: 'Delete Topic',
+    deleteTopicConfirm: 'Are you sure you want to delete this topic and all its sessions? This action cannot be undone.',
+    confirm: 'Delete',
+    cancel: 'Cancel',
+  },
+
+  exitGuard: {
+    title: 'Please wait',
+    message: 'Saving your progress...',
   },
 
   errors: {
@@ -105,5 +128,68 @@ export const en: TranslationStrings = {
       success: 'Data imported successfully',
       error: 'Failed to import data. Invalid file format.',
     },
+  },
+
+  teachingStyle: {
+    title: 'Teaching Style',
+    description: 'Customize how Claude teaches you',
+    preset: {
+      label: 'Preset',
+      options: {
+        socratic: 'Socratic',
+        handsOn: 'Hands-On',
+        theoretical: 'Theoretical',
+        storyteller: 'Storyteller',
+      },
+    },
+    depth: {
+      label: 'Depth',
+      options: {
+        shallow: 'Shallow',
+        moderate: 'Moderate',
+        deep: 'Deep',
+      },
+    },
+    pace: {
+      label: 'Pace',
+      options: {
+        quick: 'Quick',
+        measured: 'Measured',
+        thorough: 'Thorough',
+      },
+    },
+    exampleFrequency: {
+      label: 'Examples',
+      options: {
+        minimal: 'Minimal',
+        moderate: 'Moderate',
+        frequent: 'Frequent',
+      },
+    },
+    analogies: {
+      label: 'Analogies',
+      options: {
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+      },
+    },
+    formality: {
+      label: 'Formality',
+      options: {
+        casual: 'Casual',
+        balanced: 'Balanced',
+        formal: 'Formal',
+      },
+    },
+    customInstructions: {
+      label: 'Custom Instructions',
+      placeholder: 'Add any additional instructions for Claude...',
+    },
+    promptPreview: {
+      label: 'Generated Prompt',
+      description: 'This prompt will be used to guide Claude\'s teaching style',
+    },
+    save: 'Save Settings',
+    saved: 'Settings Saved',
   },
 };

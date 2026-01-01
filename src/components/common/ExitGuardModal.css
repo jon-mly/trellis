@@ -1,0 +1,51 @@
+.exit-guard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.exit-guard-modal {
+  background: var(--color-bg);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  text-align: center;
+  max-width: 300px;
+}
+
+.exit-guard-spinner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.exit-guard-icon {
+  color: var(--color-fg-muted);
+  animation: exit-guard-spin 1s linear infinite;
+}
+
+@keyframes exit-guard-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.exit-guard-title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--font-medium);
+  color: var(--color-fg);
+}
+
+.exit-guard-message {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-fg-muted);
+}

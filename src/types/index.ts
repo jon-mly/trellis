@@ -62,7 +62,7 @@ export interface TeachingStyle {
 
 export interface DashboardCard {
   id: string;
-  type: 'resume' | 'expand' | 'discover' | 'connection';
+  type: 'resume' | 'explore' | 'related' | 'wildcard';
   title: string;
   description: string;
   topicId?: string;
@@ -70,4 +70,4 @@ export interface DashboardCard {
   lastExplored?: Date;
 }
 
-export type View = 'dashboard' | 'session';
+export type View = 'dashboard' | 'session' | 'settings';

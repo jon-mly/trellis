@@ -138,6 +138,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  transition: opacity var(--transition-base);
+}
+
+.dashboard-cards--refreshing {
+  /* Cards remain fully visible and interactive during refresh */
 }
 
 .dashboard-card {

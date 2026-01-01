@@ -1,0 +1,48 @@
+.segmented-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.segmented-button-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-fg-muted);
+}
+
+.segmented-button-container {
+  display: flex;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.segmented-button {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-right: var(--border-width) solid var(--color-border);
+  background: transparent;
+  color: var(--color-fg-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.segmented-button:last-child {
+  border-right: none;
+}
+
+.segmented-button:hover:not(.active) {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-fg);
+}
+
+.segmented-button.active {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
