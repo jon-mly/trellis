@@ -137,10 +137,6 @@ export function Dashboard({
           onTopicClick={onTopicClick}
         />
       </section>
-
-      <section className="dashboard-data">
-        <DataManagement onImportComplete={onDataImport} />
-      </section>
     </div>
   );
 }

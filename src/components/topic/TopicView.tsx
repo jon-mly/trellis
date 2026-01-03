@@ -37,11 +37,17 @@ export function TopicView({ topic, onSendMessage, onDeleteTopic }: TopicViewProp
     void loadSessionsForTopic(topic.id);
   }, [topic.id, loadSessionsForTopic]);
 
-  // Reset to dashboard view when topic changes
+  // Reset to dashboard view when topic changes, unless there's an active session for this topic
   useEffect((): void => {
-    setActiveView('dashboard');
-    clearCurrentSession();
-  }, [topic.id, clearCurrentSession]);
+    // If there's already an active session for this topic (e.g., from dashboard card click),
+    // show chat view instead of resetting to dashboard
+    if (currentSession?.topicId === topic.id) {
+      setActiveView('chat');
+    } else {
+      setActiveView('dashboard');
+      clearCurrentSession();
+    }
+  }, [topic.id, currentSession?.topicId, clearCurrentSession]);
 
   const handleSessionSelect = (sessionId: string): void => {
     void loadSessionMessages(sessionId);

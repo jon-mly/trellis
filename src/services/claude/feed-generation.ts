@@ -15,7 +15,9 @@ Return a JSON object with this exact structure:
   "cards": [
     {
       "type": "resume|explore|related|wildcard",
-      "title": "short engaging title",
+      "title": "short engaging title that sparks curiosity",
+      "topicName": "broad topic name (2-4 words, e.g. 'Language Evolution', 'Music Theory', 'Quantum Physics')",
+      "category": "category for the topic (e.g. 'Science', 'Philosophy', 'Arts', 'History', 'Technology')",
       "description": "1-2 sentence hook that sparks curiosity",
       "topicId": "ID if resuming/exploring existing topic, null otherwise",
       "suggestedPrompt": "thought-provoking prompt to start the session"
@@ -24,12 +26,14 @@ Return a JSON object with this exact structure:
 }
 
 Card types and quantities:
-- "resume" (2 cards): Continue unfinished sessions. Reference specific concepts or questions left hanging. Use the topic ID.
-- "explore" (2 cards): Dig deeper into a topic they already know. Pose intriguing questions, paradoxes, or advanced angles they haven't considered yet. Use the topic ID.
-- "related" (2 cards): Suggest new topics that connect naturally to their interests. Show the bridge between what they know and what they could discover.
-- "wildcard" (2 cards): Completely different domains to expand horizons. Pick fascinating topics unrelated to their history—philosophy, art, obscure science, history, music theory, etc. The goal is serendipitous discovery.
+- "resume" (2 cards): Continue unfinished sessions. Reference specific concepts or questions left hanging. Use the topic ID. topicName should match the existing topic name.
+- "explore" (2 cards): Dig deeper into a topic they already know. Pose intriguing questions, paradoxes, or advanced angles they haven't considered yet. Use the topic ID. topicName should match the existing topic name.
+- "related" (2 cards): Suggest new topics that connect naturally to their interests. Show the bridge between what they know and what they could discover. topicName should be a broad, short topic name.
+- "wildcard" (2 cards): Completely different domains to expand horizons. Pick fascinating topics unrelated to their history—philosophy, art, obscure science, history, music theory, etc. The goal is serendipitous discovery. topicName should be a broad, short topic name.
 
 Guidelines:
+- "title" should be an engaging, curiosity-provoking title (can be a question, paradox, or intriguing phrase like "Why Languages Die" or "The Hidden Math in Music")
+- "topicName" should be a short, broad topic label suitable for categorization (e.g. "Linguistics", "Music Theory", "Philosophy of Time")
 - Write titles and descriptions that provoke curiosity, not just inform
 - Use questions, paradoxes, surprising facts, or "what if" scenarios
 - Make each card feel like an invitation to explore, not a homework assignment
@@ -79,6 +83,8 @@ export async function generateFeed(
       cards: Array<{
         type: 'resume' | 'explore' | 'related' | 'wildcard';
         title: string;
+        topicName?: string;
+        category?: string;
         description: string;
         topicId?: string | null;
         suggestedPrompt?: string;
@@ -91,6 +97,8 @@ export async function generateFeed(
       id: generateId(),
       type: card.type,
       title: card.title,
+      topicName: card.topicName,
+      category: card.category,
       description: card.description,
       topicId: card.topicId ?? undefined,
       suggestedPrompt: card.suggestedPrompt,
@@ -130,6 +138,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'Why Do We Dream?',
+      topicName: 'Dream Science',
+      category: 'Science',
       description: 'Every night your brain creates vivid hallucinations. Scientists still debate why—memory consolidation, emotional processing, or something stranger?',
       suggestedPrompt: 'Why do humans dream? What are the leading theories and what do we actually know?',
     },
@@ -137,6 +147,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'The Math Behind Music',
+      topicName: 'Music Theory',
+      category: 'Arts',
       description: 'Why do some notes sound beautiful together while others clash? The answer involves ratios discovered 2,500 years ago.',
       suggestedPrompt: 'How is music connected to mathematics? Why do certain notes harmonize?',
     },
@@ -144,6 +156,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'How Languages Die',
+      topicName: 'Linguistics',
+      category: 'Language',
       description: 'A language disappears every two weeks. What happens to the thoughts that only existed in those words?',
       suggestedPrompt: 'How do languages go extinct? What do we lose when a language dies?',
     },
@@ -151,6 +165,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'The Philosophy of Time',
+      topicName: 'Philosophy of Time',
+      category: 'Philosophy',
       description: 'Is the past real? Does the future already exist? Physicists and philosophers have surprisingly different answers.',
       suggestedPrompt: 'What is time, really? How do philosophers and physicists think about it differently?',
     },
@@ -158,6 +174,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'How Computers Think',
+      topicName: 'Computer Science',
+      category: 'Technology',
       description: 'From sand to silicon to software—how does electricity become thought? The journey is stranger than you might expect.',
       suggestedPrompt: 'How do computers actually work at a fundamental level? How does code become action?',
     },
@@ -165,6 +183,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'The Art of Fermentation',
+      topicName: 'Fermentation Science',
+      category: 'Science',
       description: 'Bread, beer, cheese, kimchi—humans have been collaborating with microbes for millennia. What makes fermentation work?',
       suggestedPrompt: 'How does fermentation work? Why have humans relied on it across all cultures?',
     },
@@ -172,6 +192,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'Game Theory in Nature',
+      topicName: 'Game Theory',
+      category: 'Mathematics',
       description: 'Bacteria, birds, and businesses all play strategic games. The same mathematics explains why some cooperate and others cheat.',
       suggestedPrompt: 'What is game theory and how does it appear in nature? How do animals and even microbes use strategy?',
     },
@@ -179,6 +201,8 @@ function getDefaultCards(): DashboardCard[] {
       id: generateId(),
       type: 'wildcard',
       title: 'The Science of Color',
+      topicName: 'Color Perception',
+      category: 'Science',
       description: 'Color doesn\'t exist outside your brain—it\'s a story your mind tells about light. Some animals see colors we can\'t even imagine.',
       suggestedPrompt: 'How does color perception work? Why do some animals see colors humans can\'t?',
     },

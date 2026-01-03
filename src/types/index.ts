@@ -66,6 +66,8 @@ export interface DashboardCard {
   title: string;
   description: string;
   topicId?: string;
+  topicName?: string;
+  category?: string;
   suggestedPrompt?: string;
   lastExplored?: Date;
 }

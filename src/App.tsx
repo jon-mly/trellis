@@ -46,13 +46,14 @@ function App(): ReactElement {
     }
   }, [settings?.onboardingComplete, view, loadFeed]);
 
+  // Refresh knowledge context when topics change (e.g., after deletion)
   useEffect(() => {
     const loadContext = async () => {
       const context = await getKnowledgeContext();
       setKnowledgeContext(context);
     };
     loadContext();
-  }, [getKnowledgeContext]);
+  }, [getKnowledgeContext, knowledgeTopics]);
 
   const handleTopicSelect = (topicId: string): void => {
     setSelectedTopicId(topicId);
@@ -95,9 +96,10 @@ function App(): ReactElement {
   const handleCardClick = async (card: DashboardCard): Promise<void> => {
     let topicId = card.topicId;
 
-    // If card doesn't have a topicId, create a new topic from the card title
+    // If card doesn't have a topicId, create a new topic from topicName (or fallback to title)
     if (!topicId) {
-      const newTopic = await createTopic(card.title);
+      const topicName = card.topicName ?? card.title;
+      const newTopic = await createTopic(topicName, card.category);
       topicId = newTopic.id;
     }
 
