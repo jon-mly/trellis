@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Message, Session, Topic, PromptContext } from '../types';
+import type { Message, Session, Topic, PromptContext, SandboxDemo } from '../types';
 import { db, generateId } from '../services/storage/db';
 import { streamChat, type ChatOptions } from '../services/claude/cli-provider';
+import { generateDemo } from '../services/claude/demo-generation';
 import { useKnowledgeStore } from './knowledgeStore';
 
 interface SessionState {
@@ -16,6 +17,11 @@ interface SessionState {
   error: string | null;
   cliNotFound: boolean;
 
+  // Sandbox state
+  demos: SandboxDemo[];
+  currentDemo: SandboxDemo | null;
+  isGeneratingDemo: boolean;
+
   loadTopics: () => Promise<void>;
   createTopic: (name: string, category?: string) => Promise<Topic>;
   deleteTopic: (topicId: string) => Promise<void>;
@@ -28,6 +34,11 @@ interface SessionState {
   endSession: () => Promise<Topic | null>;
   resetCliNotFound: () => void;
   clearCurrentSession: () => void;
+
+  // Sandbox actions
+  requestDemo: () => Promise<void>;
+  selectDemo: (demoId: string) => void;
+  closeSandbox: () => void;
 }
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -41,6 +52,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   streamingContent: '',
   error: null,
   cliNotFound: false,
+
+  // Sandbox state
+  demos: [],
+  currentDemo: null,
+  isGeneratingDemo: false,
 
   loadTopics: async (): Promise<void> => {
     const topics: Topic[] = await db.topics.orderBy('lastExploredAt').reverse().toArray();
@@ -273,11 +289,17 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       content: m.content,
     }));
 
+    // Only include knowledge context on the first message of a new session
+    const chatOptions: ChatOptions = {
+      ...options,
+      knowledgeContext: isFirstMessage ? options?.knowledgeContext : undefined,
+    };
+
     let assistantContent: string = '';
     let promptContext: PromptContext | undefined;
 
     try {
-      for await (const chunk of streamChat(chatHistory, options)) {
+      for await (const chunk of streamChat(chatHistory, chatOptions)) {
         if (chunk.type === 'prompt_context') {
           promptContext = chunk.promptContext;
           // Update the user message with prompt context
@@ -356,7 +378,57 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     return topic;
   },
 
-  resetCliNotFound: () => {
+  resetCliNotFound: (): void => {
     set({ cliNotFound: false });
+  },
+
+  // Sandbox actions
+  requestDemo: async (): Promise<void> => {
+    const { currentSession, messages } = get();
+
+    if (!currentSession || messages.length === 0) {
+      set({ error: 'No conversation context for demo generation' });
+      return;
+    }
+
+    set({ isGeneratingDemo: true, error: null });
+
+    const result = await generateDemo(messages);
+
+    if (result.cliNotFound) {
+      set({ cliNotFound: true, isGeneratingDemo: false });
+      return;
+    }
+
+    if (!result.success || !result.html) {
+      set({ error: result.error ?? 'Failed to generate demo', isGeneratingDemo: false });
+      return;
+    }
+
+    const demo: SandboxDemo = {
+      id: generateId(),
+      sessionId: currentSession.id,
+      title: result.title ?? 'Interactive Demo',
+      html: result.html,
+      createdAt: new Date(),
+    };
+
+    set((state: SessionState) => ({
+      demos: [...state.demos, demo],
+      currentDemo: demo,
+      isGeneratingDemo: false,
+    }));
+  },
+
+  selectDemo: (demoId: string): void => {
+    const { demos } = get();
+    const demo = demos.find((d: SandboxDemo) => d.id === demoId);
+    if (demo) {
+      set({ currentDemo: demo });
+    }
+  },
+
+  closeSandbox: (): void => {
+    set({ currentDemo: null });
   },
 }));

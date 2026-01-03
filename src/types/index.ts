@@ -71,3 +71,36 @@ export interface DashboardCard {
 }
 
 export type View = 'dashboard' | 'session' | 'settings';
+
+// Topic Dashboard types
+export interface TopicSummary {
+  id: string;
+  topicId: string;
+  knowledgeGraph: KnowledgeGraphNode[];
+  followUpSuggestions: TopicSuggestion[];
+  generatedAt: Date;
+}
+
+export interface KnowledgeGraphNode {
+  conceptId: string;
+  conceptName: string;
+  familiarityLevel: 'introduced' | 'explored' | 'understood';
+  children: KnowledgeGraphNode[];
+  relatedConcepts: string[];
+}
+
+export interface TopicSuggestion {
+  id: string;
+  title: string;
+  description: string;
+  suggestedPrompt: string;
+  type: 'deepen' | 'connect' | 'challenge' | 'apply';
+}
+
+export interface SandboxDemo {
+  id: string;
+  sessionId: string;
+  title: string;
+  html: string;
+  createdAt: Date;
+}

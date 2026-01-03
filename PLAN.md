@@ -295,11 +295,12 @@ src/
 - [x] Teaching style configuration - `src/stores/settingsStore.ts`
 - [x] i18n system (English) - `src/i18n/`
 
-### Phase 3: Sandbox
-- [ ] Sandboxed iframe implementation
-- [ ] Claude prompt engineering for demo generation
-- [ ] Insert/update/replace code in sandbox
-- [ ] Panel resizing and pop-out
+### Phase 3: Sandbox ✅ COMPLETE
+- [x] Sandboxed iframe implementation - `src/components/sandbox/SandboxPanel.tsx`
+- [x] Claude prompt engineering for demo generation - `src/services/claude/demo-generation.ts`
+- [x] On-demand demo generation via button in chat - `src/components/topic/ChatPane.tsx`
+- [x] Demo history per session with selector - stored in `sessionStore.ts`
+- [ ] Panel resizing and pop-out (deferred)
 
 ### Phase 4: Knowledge System ✅ COMPLETE
 - [x] Concept extraction prompts - `src/services/claude/concept-extraction.ts`
@@ -385,8 +386,8 @@ Only add complexity when:
 
 ## Current Status
 
-**Phase**: 5 - Polish ✅ COMPLETE
-**Next Action**: Phase 3 (Sandbox) or deployment preparation
+**Phase**: All core phases complete ✅
+**Next Action**: Panel resizing/pop-out for sandbox, or deployment preparation
 
 ---
 

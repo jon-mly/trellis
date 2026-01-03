@@ -5,11 +5,12 @@ import { Dashboard } from "./components/dashboard/Dashboard";
 import { TopicView, NewSessionView } from "./components/topic";
 import { Onboarding } from "./components/onboarding/Onboarding";
 import { ExitGuardModal } from "./components/common";
-import { TeachingStyleView } from "./components/settings";
+import { SettingsView } from "./components/settings";
 import { useSessionStore } from "./stores/sessionStore";
 import { useSettingsStore } from "./stores/settingsStore";
 import { useDashboardStore } from "./stores/dashboardStore";
 import { useKnowledgeStore } from "./stores/knowledgeStore";
+import { useTopicSummaryStore } from "./stores/topicSummaryStore";
 import { useExitGuard } from "./hooks/useExitGuard";
 import { I18nProvider, getTranslations, detectLocale } from "./i18n";
 import type { DashboardCard, TeachingStyle, View } from "./types";
@@ -27,7 +28,9 @@ function App(): ReactElement {
 
   const { settings, isLoaded, loadSettings, completeOnboarding, updateTeachingStyle } = useSettingsStore();
 
-  const { cards, isLoading: isFeedLoading, loadFeed, refreshFeed } = useDashboardStore();
+  const { cards, isLoading: isFeedLoading, loadFeed, refreshFeed, refreshFeedInBackground } = useDashboardStore();
+
+  const { regenerateSummaryInBackground } = useTopicSummaryStore();
 
   const { topics: knowledgeTopics, concepts, loadKnowledge, getKnowledgeContext } = useKnowledgeStore();
 
@@ -64,10 +67,20 @@ function App(): ReactElement {
   };
 
   const handleDashboard = (): void => {
+    const topicIdBeforeLeaving = selectedTopicId;
     setView("dashboard");
     setSelectedTopicId(null);
-    void endSession().then(() => refreshFeed());
     clearCurrentSession();
+
+    // End session and trigger background updates
+    void endSession().then(() => {
+      // Regenerate dashboard feed in background
+      refreshFeedInBackground();
+      // Regenerate topic summary in background if we were viewing a topic
+      if (topicIdBeforeLeaving) {
+        regenerateSummaryInBackground(topicIdBeforeLeaving);
+      }
+    });
   };
 
   const handleSettings = (): void => {
@@ -122,7 +135,7 @@ function App(): ReactElement {
       await deleteTopic(selectedTopicId);
       setSelectedTopicId(null);
       setView("dashboard");
-      refreshFeed();
+      refreshFeedInBackground();
     }
   };
 
@@ -176,7 +189,16 @@ function App(): ReactElement {
                 }}
               />
             ) : view === "settings" && settings?.teachingStyle ? (
-              <TeachingStyleView teachingStyle={settings.teachingStyle} onSave={handleSaveTeachingStyle} onBack={handleDashboard} />
+              <SettingsView
+                teachingStyle={settings.teachingStyle}
+                onSave={handleSaveTeachingStyle}
+                onBack={handleDashboard}
+                onDataChange={() => {
+                  loadKnowledge();
+                  loadTopics();
+                  refreshFeed();
+                }}
+              />
             ) : view === "session" && selectedTopic ? (
               <TopicView topic={selectedTopic} onSendMessage={handleSendMessage} onDeleteTopic={handleDeleteTopic} />
             ) : view === "session" ? (

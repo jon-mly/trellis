@@ -29,6 +29,7 @@ interface KnowledgeState {
   getTopicWithConcepts: (topicId: string) => Promise<{ topic: Topic; concepts: Concept[] } | null>;
   getRelatedTopics: (topicId: string) => Promise<Topic[]>;
   getKnowledgeContext: () => Promise<string>;
+  clearAllKnowledge: () => Promise<void>;
 }
 
 export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
@@ -319,5 +320,14 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
     );
 
     return `The student has previously explored:\n${topicSummaries.join('\n')}`;
+  },
+
+  clearAllKnowledge: async (): Promise<void> => {
+    // Clear all topics and concepts from the database
+    await db.topics.clear();
+    await db.concepts.clear();
+
+    // Update state
+    set({ topics: [], concepts: [], lastExtraction: null });
   },
 }));

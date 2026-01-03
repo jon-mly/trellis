@@ -89,6 +89,33 @@ export const en: TranslationStrings = {
     settings: 'Settings',
   },
 
+  settings: {
+    title: 'Settings',
+    description: 'Customize your learning experience',
+    tabs: {
+      teachingStyle: 'Teaching Style',
+      knowledgeData: 'Knowledge & Data',
+    },
+    knowledgeData: {
+      title: 'Knowledge & Data',
+      description: 'Manage your learning data, import/export backups, and clear knowledge',
+      dangerZone: 'Danger Zone',
+      clearAll: {
+        button: 'Clear All Knowledge',
+        description: 'Permanently delete all topics and concepts from your knowledge map.',
+        empty: 'No knowledge to clear.',
+        success: 'All knowledge cleared successfully.',
+        confirmTitle: 'Are you sure?',
+        confirmMessage: 'This will permanently delete all topics and concepts. This action cannot be undone.',
+        finalTitle: 'Final confirmation',
+        finalMessage: 'Click "Delete Everything" to permanently remove all your learning data.',
+        cancel: 'Cancel',
+        proceed: 'Yes, continue',
+        deleteAll: 'Delete Everything',
+      },
+    },
+  },
+
   topicView: {
     newSession: 'New Session',
     sessions: 'Sessions',
@@ -191,5 +218,33 @@ export const en: TranslationStrings = {
     },
     save: 'Save Settings',
     saved: 'Settings Saved',
+  },
+
+  sandbox: {
+    generateDemo: 'Generate interactive demo',
+    generating: 'Generating demo...',
+    close: 'Close sandbox',
+    noDemo: 'No demo available',
+  },
+
+  topicDashboard: {
+    title: 'Overview',
+    knowledgeGraph: 'Knowledge Map',
+    knowledgeGraphEmpty: 'Concepts will appear here as you explore this topic.',
+    suggestions: 'Continue Learning',
+    suggestionsEmpty: 'Start a conversation to get personalized suggestions.',
+    startChat: 'New Conversation',
+    suggestionTypes: {
+      deepen: 'Go Deeper',
+      connect: 'Make Connections',
+      challenge: 'Challenge Yourself',
+      apply: 'Apply Knowledge',
+    },
+    familiarity: {
+      understood: 'Solid understanding',
+      explored: 'Explored',
+      introduced: 'Just introduced',
+    },
+    lastUpdated: 'Last updated',
   },
 };

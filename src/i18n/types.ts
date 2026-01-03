@@ -95,6 +95,34 @@ export interface TranslationStrings {
     settings: string;
   };
 
+  // Settings
+  settings: {
+    title: string;
+    description: string;
+    tabs: {
+      teachingStyle: string;
+      knowledgeData: string;
+    };
+    knowledgeData: {
+      title: string;
+      description: string;
+      dangerZone: string;
+      clearAll: {
+        button: string;
+        description: string;
+        empty: string;
+        success: string;
+        confirmTitle: string;
+        confirmMessage: string;
+        finalTitle: string;
+        finalMessage: string;
+        cancel: string;
+        proceed: string;
+        deleteAll: string;
+      };
+    };
+  };
+
   // Topic View
   topicView: {
     newSession: string;
@@ -202,5 +230,35 @@ export interface TranslationStrings {
     };
     save: string;
     saved: string;
+  };
+
+  // Sandbox
+  sandbox: {
+    generateDemo: string;
+    generating: string;
+    close: string;
+    noDemo: string;
+  };
+
+  // Topic Dashboard
+  topicDashboard: {
+    title: string;
+    knowledgeGraph: string;
+    knowledgeGraphEmpty: string;
+    suggestions: string;
+    suggestionsEmpty: string;
+    startChat: string;
+    suggestionTypes: {
+      deepen: string;
+      connect: string;
+      challenge: string;
+      apply: string;
+    };
+    familiarity: {
+      understood: string;
+      explored: string;
+      introduced: string;
+    };
+    lastUpdated: string;
   };
 }

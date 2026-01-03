@@ -10,6 +10,7 @@ interface DashboardState {
 
   loadFeed: () => Promise<void>;
   refreshFeed: () => Promise<void>;
+  refreshFeedInBackground: () => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
@@ -52,5 +53,18 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       error: result.error,
       lastGenerated: new Date(),
     });
+  },
+
+  refreshFeedInBackground: (): void => {
+    // Fire and forget - no loading state, silent update
+    void (async () => {
+      const result = await generateFeedFromDb();
+
+      set({
+        cards: result.cards,
+        error: result.error,
+        lastGenerated: new Date(),
+      });
+    })();
   },
 }));

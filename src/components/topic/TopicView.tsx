@@ -1,9 +1,10 @@
-import { useEffect, type ReactElement } from 'react';
-import type { Topic, Session, Message } from '../../types';
+import { useEffect, useState, type ReactElement } from 'react';
+import type { Topic, TopicSuggestion } from '../../types';
 import type { ChatOptions } from '../../services/claude/cli-provider';
 import { useSessionStore } from '../../stores/sessionStore';
 import { TopicSidebar } from './TopicSidebar';
 import { ChatPane } from './ChatPane';
+import { TopicDashboard } from './TopicDashboard';
 import './TopicView.css';
 
 interface TopicViewProps {
@@ -13,6 +14,8 @@ interface TopicViewProps {
 }
 
 export function TopicView({ topic, onSendMessage, onDeleteTopic }: TopicViewProps): ReactElement {
+  const [activeView, setActiveView] = useState<'dashboard' | 'chat'>('dashboard');
+
   const {
     currentSession,
     messages,
@@ -20,10 +23,13 @@ export function TopicView({ topic, onSendMessage, onDeleteTopic }: TopicViewProp
     sessionsLoaded,
     isLoading,
     streamingContent,
+    isGeneratingDemo,
     loadSessionsForTopic,
     loadSessionMessages,
     startSession,
     deleteSession,
+    requestDemo,
+    clearCurrentSession,
   } = useSessionStore();
 
   // Load sessions for this topic on mount or topic change
@@ -31,65 +37,87 @@ export function TopicView({ topic, onSendMessage, onDeleteTopic }: TopicViewProp
     void loadSessionsForTopic(topic.id);
   }, [topic.id, loadSessionsForTopic]);
 
-  // Auto-select the most recent session if none selected, or start a draft session if no sessions exist
+  // Reset to dashboard view when topic changes
   useEffect((): void => {
-    // Wait until sessions have been loaded before deciding what to do
-    if (!sessionsLoaded) {
-      return;
-    }
-
-    if (!currentSession && sessionsForTopic.length > 0) {
-      // Load the most recent session
-      const mostRecentSession: Session = sessionsForTopic[0];
-      void loadSessionMessages(mostRecentSession.id);
-    } else if (!currentSession && sessionsForTopic.length === 0) {
-      // No sessions exist, start a draft session (will be saved on first message)
-      startSession(topic.id);
-    }
-  }, [currentSession, sessionsForTopic, sessionsLoaded, topic.id, loadSessionMessages, startSession]);
+    setActiveView('dashboard');
+    clearCurrentSession();
+  }, [topic.id, clearCurrentSession]);
 
   const handleSessionSelect = (sessionId: string): void => {
     void loadSessionMessages(sessionId);
+    setActiveView('chat');
   };
 
   const handleNewSession = (): void => {
-    void startSession(topic.id);
+    startSession(topic.id);
+    setActiveView('chat');
   };
 
   const handleDeleteSession = (sessionId: string): void => {
     void deleteSession(sessionId);
+    // If we deleted the current session, go back to dashboard
+    if (currentSession?.id === sessionId) {
+      setActiveView('dashboard');
+    }
   };
 
   const handleSendMessage = (content: string): void => {
     onSendMessage(content);
   };
 
-  const selectedSessionId: string | null = currentSession?.id ?? null;
+  const handleShowDashboard = (): void => {
+    setActiveView('dashboard');
+  };
+
+  const handleSuggestionClick = (suggestion: TopicSuggestion): void => {
+    // Start new session and send the suggested prompt
+    startSession(topic.id);
+    setActiveView('chat');
+    // Use setTimeout to ensure the session is created before sending
+    setTimeout(() => {
+      onSendMessage(suggestion.suggestedPrompt);
+    }, 0);
+  };
+
+  const selectedSessionId: string | null = activeView === 'chat' ? (currentSession?.id ?? null) : null;
 
   return (
     <div className="topic-view">
       <TopicSidebar
-        topic={topic}
         sessions={sessionsForTopic}
         selectedSessionId={selectedSessionId}
+        showingDashboard={activeView === 'dashboard'}
         onSessionSelect={handleSessionSelect}
         onNewSession={handleNewSession}
         onDeleteSession={handleDeleteSession}
         onDeleteTopic={onDeleteTopic}
+        onShowDashboard={handleShowDashboard}
       />
       <div className="topic-view-main">
-        <div className="topic-view-header">
-          <h2 className="topic-view-title">{topic.name}</h2>
-          {topic.category && (
-            <span className="topic-view-category">{topic.category}</span>
-          )}
-        </div>
-        <ChatPane
-          messages={messages}
-          isLoading={isLoading}
-          streamingContent={streamingContent}
-          onSendMessage={handleSendMessage}
-        />
+        {activeView === 'dashboard' ? (
+          <TopicDashboard
+            topic={topic}
+            onSuggestionClick={handleSuggestionClick}
+            onStartChat={handleNewSession}
+          />
+        ) : (
+          <>
+            <div className="topic-view-header">
+              <h2 className="topic-view-title">{topic.name}</h2>
+              {topic.category && (
+                <span className="topic-view-category">{topic.category}</span>
+              )}
+            </div>
+            <ChatPane
+              messages={messages}
+              isLoading={isLoading}
+              streamingContent={streamingContent}
+              onSendMessage={handleSendMessage}
+              onRequestDemo={requestDemo}
+              isGeneratingDemo={isGeneratingDemo}
+            />
+          </>
+        )}
       </div>
     </div>
   );

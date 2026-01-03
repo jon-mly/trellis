@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type ReactElement, type FormEvent, type KeyboardEvent, type ChangeEvent } from 'react';
-import { ArrowUp, Eye, X } from 'lucide-react';
+import { ArrowUp, Eye, X, Play } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { Message, PromptContext } from '../../types';
 import { useI18n } from '../../i18n';
 import './ChatPane.css';
@@ -10,6 +11,8 @@ export interface ChatPaneProps {
   isLoading: boolean;
   streamingContent: string;
   onSendMessage: (content: string) => void;
+  onRequestDemo?: () => void;
+  isGeneratingDemo?: boolean;
 }
 
 export function ChatPane({
@@ -17,6 +20,8 @@ export function ChatPane({
   isLoading,
   streamingContent,
   onSendMessage,
+  onRequestDemo,
+  isGeneratingDemo = false,
 }: ChatPaneProps): ReactElement {
   const t = useI18n();
   const [input, setInput] = useState<string>('');
@@ -94,7 +99,7 @@ export function ChatPane({
               )}
             </div>
             <div className="chat-pane-message-content">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
             </div>
           </div>
         ))}
@@ -103,7 +108,7 @@ export function ChatPane({
           <div className="chat-pane-message chat-pane-message--assistant">
             <div className="chat-pane-message-role">Assistant</div>
             <div className="chat-pane-message-content">
-              <ReactMarkdown>{streamingContent}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -134,13 +139,26 @@ export function ChatPane({
             rows={1}
             disabled={isLoading}
           />
-          <button
-            type="submit"
-            className="chat-pane-submit"
-            disabled={!input.trim() || isLoading}
-          >
-            <ArrowUp size={16} strokeWidth={1.5} />
-          </button>
+          <div className="chat-pane-actions">
+            {onRequestDemo && messages.length > 0 && (
+              <button
+                type="button"
+                className={`chat-pane-demo-btn ${isGeneratingDemo ? 'chat-pane-demo-btn--loading' : ''}`}
+                onClick={onRequestDemo}
+                disabled={isLoading || isGeneratingDemo}
+                title={t.sandbox.generateDemo}
+              >
+                <Play size={14} strokeWidth={1.5} />
+              </button>
+            )}
+            <button
+              type="submit"
+              className="chat-pane-submit"
+              disabled={!input.trim() || isLoading}
+            >
+              <ArrowUp size={16} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
       </form>
 

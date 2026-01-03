@@ -10,7 +10,7 @@ interface NewSessionViewProps {
 
 export function NewSessionView({ onSendMessage }: NewSessionViewProps): ReactElement {
   const t = useI18n();
-  const { messages, isLoading, streamingContent } = useSessionStore();
+  const { messages, isLoading, streamingContent, isGeneratingDemo, requestDemo } = useSessionStore();
 
   return (
     <div className="topic-view">
@@ -23,6 +23,8 @@ export function NewSessionView({ onSendMessage }: NewSessionViewProps): ReactEle
           isLoading={isLoading}
           streamingContent={streamingContent}
           onSendMessage={onSendMessage}
+          onRequestDemo={requestDemo}
+          isGeneratingDemo={isGeneratingDemo}
         />
       </div>
     </div>

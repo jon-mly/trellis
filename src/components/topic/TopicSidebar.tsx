@@ -1,18 +1,19 @@
 import { type ReactElement, type MouseEvent, useState } from 'react';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
-import type { Topic, Session } from '../../types';
+import { Plus, MessageSquare, Trash2, LayoutDashboard } from 'lucide-react';
+import type { Session } from '../../types';
 import { useI18n } from '../../i18n';
 import { ConfirmModal } from '../common';
 import './TopicSidebar.css';
 
 interface TopicSidebarProps {
-  topic: Topic;
   sessions: Session[];
   selectedSessionId: string | null;
+  showingDashboard?: boolean;
   onSessionSelect: (sessionId: string) => void;
   onNewSession: () => void;
   onDeleteSession: (sessionId: string) => void;
   onDeleteTopic: () => void | Promise<void>;
+  onShowDashboard?: () => void;
 }
 
 function formatSessionDate(date: Date): string {
@@ -39,13 +40,14 @@ function formatSessionDate(date: Date): string {
 }
 
 export function TopicSidebar({
-  topic,
   sessions,
   selectedSessionId,
+  showingDashboard = false,
   onSessionSelect,
   onNewSession,
   onDeleteSession,
   onDeleteTopic,
+  onShowDashboard,
 }: TopicSidebarProps): ReactElement {
   const t = useI18n();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -70,14 +72,18 @@ export function TopicSidebar({
 
   return (
     <aside className="topic-sidebar">
-      <div className="topic-sidebar-header">
-        <div className="topic-sidebar-summary">
-          <h3 className="topic-sidebar-summary-label">{t.topicView.summary}</h3>
-          <p className="topic-sidebar-summary-text">
-            {topic.summary ?? t.topicView.noSummary}
-          </p>
+      {onShowDashboard && (
+        <div className="topic-sidebar-overview">
+          <button
+            type="button"
+            className={`topic-sidebar-overview-btn ${showingDashboard ? 'active' : ''}`}
+            onClick={onShowDashboard}
+          >
+            <LayoutDashboard size={14} strokeWidth={1.5} />
+            <span>{t.topicDashboard.title}</span>
+          </button>
         </div>
-      </div>
+      )}
 
       <div className="topic-sidebar-sessions">
         <div className="topic-sidebar-sessions-header">

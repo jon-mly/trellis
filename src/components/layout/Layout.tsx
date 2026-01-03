@@ -1,5 +1,7 @@
 import type { ReactNode, ReactElement } from 'react';
 import { Sidebar } from './Sidebar';
+import { SandboxPanel } from '../sandbox';
+import { useSessionStore } from '../../stores/sessionStore';
 import type { Topic } from '../../types';
 import './Layout.css';
 
@@ -22,6 +24,8 @@ export function Layout({
   onDashboard,
   onSettings,
 }: LayoutProps): ReactElement {
+  const { currentDemo, demos, selectDemo, closeSandbox } = useSessionStore();
+
   return (
     <div className="layout">
       <Sidebar
@@ -35,6 +39,14 @@ export function Layout({
       <main className="layout-main">
         {children}
       </main>
+      {currentDemo && (
+        <SandboxPanel
+          currentDemo={currentDemo}
+          demos={demos}
+          onSelectDemo={selectDemo}
+          onClose={closeSandbox}
+        />
+      )}
     </div>
   );
 }

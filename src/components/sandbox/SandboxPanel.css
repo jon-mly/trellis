@@ -1,0 +1,102 @@
+.sandbox-panel {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  min-width: 300px;
+  max-width: 50vw;
+  height: 100%;
+  border-left: var(--border-width) solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.sandbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.sandbox-title-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.sandbox-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sandbox-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sandbox-select {
+  appearance: none;
+  background: transparent;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-6) var(--space-1) var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-fg);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.sandbox-select:hover {
+  border-color: var(--color-fg-muted);
+}
+
+.sandbox-select:focus {
+  outline: none;
+  border-color: var(--color-fg);
+}
+
+.sandbox-select-icon {
+  position: absolute;
+  right: var(--space-2);
+  pointer-events: none;
+  color: var(--color-fg-muted);
+}
+
+.sandbox-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.sandbox-close:hover {
+  border-color: var(--color-fg);
+  color: var(--color-fg);
+}
+
+.sandbox-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sandbox-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #0a0a0a;
+}
