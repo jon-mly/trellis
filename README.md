@@ -1,73 +1,55 @@
-# React + TypeScript + Vite
+# Trellis
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Note:** This project is currently under active development.
 
-Currently, two official plugins are available:
+A Claude Code based learning companion for curious autodidacts. Trellis helps you explore topics through AI-powered conversations while tracking your knowledge growth over time.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Conversational Learning** - Chat with Claude to explore any topic in depth
+- **Knowledge Tracking** - Automatically extracts and maps concepts as you learn
+- **Personalized Teaching Styles** - Choose between Socratic, hands-on, theoretical, or storyteller approaches
+- **Smart Dashboard** - Get suggestions for what to learn next based on your history
+- **Topic Organization** - Sessions are grouped by topic with summaries and knowledge graphs
+- **Local-First** - All data stored locally using IndexedDB, no API key storage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Requirements
 
-## Expanding the ESLint configuration
+- [Claude CLI](https://github.com/anthropics/claude-code) installed and configured
+- Node.js 18+
+- Rust (for Tauri)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# Clone the repository
+git clone https://github.com/your-username/trellis.git
+cd trellis
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run in development mode
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Frontend**: React 19, TypeScript, Zustand
+- **Desktop**: Tauri v2
+- **Storage**: Dexie (IndexedDB)
+- **AI**: Claude CLI
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Roadmap
+
+We're just getting started. Here's what's coming next:
+
+- **Multi-Provider Support** - Bring your own AI with Gemini CLI integration and OpenRouter API keys
+- **Web App** - Access Trellis from anywhere with a hosted web version
+- **Desktop Installers** - One-click installers for macOS, Windows, and Linux — no dev setup required
+
+Have ideas? Open an issue or start a discussion!
+
+## License
+
+MIT
